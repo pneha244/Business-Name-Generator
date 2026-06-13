@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Business Name Generator</title>
+    <link rel="stylesheet" href="/static/style.css">
+  </head>
+  <body>
+    <main class="container">
+      <h1>Business Name Generator</h1>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <ul class="messages">
+          {% for category, msg in messages %}
+            <li class="{{ category }}">{{ msg }}</li>
+          {% endfor %}
+          </ul>
+        {% endif %}
+      {% endwith %}
+
+      <form method="post">
+        <label>Keywords</label>
+        {% set kw_list = [
+          'Tech','Digital','Cloud','Data','Smart','Green','Organic','Coffee','Bakery','Fitness','Health','Care',
+          'Secure','Wallet','Pay','Shop','Market','Home','Build','Design','Studio','Lab','Hub','Works','Creative',
+          'Prime','Apex','Pixel','Spark','Blue','Neo','Next','Urban','Fresh','True','Omni','Alpha','Beta','Local',
+          'Global','Connect','Social','Media','Travel','Virtual','Mobile','Gourmet','Artisan','Luxe','Cozy','Bright'
+        ] %}
+        <div class="multi-select-dropdown" id="keywords-dropdown">
+          <button type="button" class="dropdown-toggle" id="keywords-toggle">
+            <span id="keywords-label" class="selected-text {% if form.keywords|length == 0 %}placeholder{% endif %}">{{ form.keywords|length > 0 and form.keywords|join(', ') or 'Select keywords' }}</span>
+            <span class="arrow">▾</span>
+          </button>
+          <div class="dropdown-list" id="keywords-list">
+            {% for kw in kw_list %}
+              <label class="dropdown-item">
+                <input type="checkbox" name="keywords" value="{{ kw }}" {% if kw in form.keywords %}checked{% endif %} />
+                {{ kw }}
+              </label>
+            {% endfor %}
+            <label class="dropdown-item">
+              <input type="checkbox" name="keywords" value="Other" {% if 'Other' in form.keywords %}checked{% endif %} id="other-keyword-checkbox" />
+              Other
+            </label>
+          </div>
+        </div>
+
+        <div id="other-keyword-row" class="hidden-row" style="display: {% if 'Other' in form.keywords %}block{% else %}none{% endif %}; margin-top:8px;">
+          <label>Other keyword (comma-separated)</label>
+          <input name="other_keyword" value="{{ form.other_keyword }}" placeholder="e.g. renewable, boutique" />
+        </div>
+
+        <label>Industry</label>
+        <select name="industry" id="industry-select">
+          {% set industries = [
+            'Technology','Software','E-commerce','Food & Beverage','Health & Wellness','Finance','Education',
+            'Real Estate','Retail','Fashion','Consulting','Legal','Automotive','Travel','Hospitality','Entertainment',
+            'Media','Marketing','Agriculture','Manufacturing','Logistics','Construction','Energy','Beauty','Sports',
+            'Nonprofit','Gaming','AI & Machine Learning','Biotechnology','Cybersecurity','Telecommunications',
+            'Art & Design','Home Services','Pet Care','Children','Craft & Handmade','Photography','Events','Other'
+          ] %}
+          {% for ind in industries %}
+            <option value="{{ ind }}" {% if form.industry==ind %}selected{% endif %}>{{ ind }}</option>
+          {% endfor %}
+        </select>
+
+        <div id="other-industry-row" style="display: {% if form.industry=='Other' %}block{% else %}none{% endif %}; margin-top:8px;">
+          <label>Other industry (enter custom)</label>
+          <input name="other_industry" value="{{ form.other_industry }}" placeholder="e.g. Quantum Computing" />
+        </div>
+
+        <label>Business description (optional)</label>
+        <textarea name="description" rows="3" placeholder="Briefly describe your business or product">{{ form.description }}</textarea>
+
+        <label>Style</label>
+        <select name="style">
+          <option value="modern" {% if form.style=='modern' %}selected{% endif %}>Modern</option>
+          <option value="professional" {% if form.style=='professional' %}selected{% endif %}>Professional</option>
+          <option value="creative" {% if form.style=='creative' %}selected{% endif %}>Creative</option>
+        </select>
+
+        <label>Number of names</label>
+        <input name="count" type="number" min="1" max="50" value="{{ form.count }}" />
+
+        <div class="buttons">
+          <button type="submit">Generate</button>
+          <button type="submit" name="regenerate" value="1">Generate Again</button>
+        </div>
+      </form>
+
+      <script>
+        const industrySelect = document.getElementById('industry-select');
+        const otherIndustryRow = document.getElementById('other-industry-row');
+        const keywordsToggle = document.getElementById('keywords-toggle');
+        const keywordsList = document.getElementById('keywords-list');
+        const otherKeywordRow = document.getElementById('other-keyword-row');
+        const otherKeywordCheckbox = document.getElementById('other-keyword-checkbox');
+        const keywordsLabel = document.getElementById('keywords-label');
+
+        industrySelect.addEventListener('change', function(){
+          if (this.value === 'Other') otherIndustryRow.style.display = 'block'; else otherIndustryRow.style.display = 'none';
+        });
+
+        function updateKeywordsLabel() {
+          const checked = Array.from(keywordsList.querySelectorAll('input[type=checkbox]:checked')).map(cb => cb.value);
+          if (checked.length === 0) {
+            keywordsLabel.textContent = 'Select keywords';
+            keywordsLabel.classList.add('placeholder');
+          } else {
+            keywordsLabel.textContent = checked.join(', ');
+            keywordsLabel.classList.remove('placeholder');
+          }
+        }
+
+        keywordsToggle.addEventListener('click', function(){
+          keywordsList.classList.toggle('open');
+        });
+
+        keywordsList.addEventListener('change', function(event){
+          if (event.target === otherKeywordCheckbox) {
+            otherKeywordRow.style.display = event.target.checked ? 'block' : 'none';
+          }
+          updateKeywordsLabel();
+        });
+
+        document.addEventListener('click', function(event){
+          if (!keywordsToggle.contains(event.target) && !keywordsList.contains(event.target)) {
+            keywordsList.classList.remove('open');
+          }
+        });
+
+        updateKeywordsLabel();
+      </script>
+
+      {% if results %}
+        <section>
+          <h2>Suggestions</h2>
+          <ol class="results">
+          {% for r in results %}
+            <li>{{ r }}</li>
+          {% endfor %}
+          </ol>
+        </section>
+      {% endif %}
+      <footer style="margin-top:20px; font-size:0.9rem; color:#555;">Developed by Neha P</footer>
+    </main>
+  </body>
+</html>
