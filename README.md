@@ -78,8 +78,6 @@ http://127.0.0.1:5000
 * HTML/CSS
 * Jinja2 Templates
 
-## Version
-
-**Business Name Generator v1.0**
+## Authors
 
 Developed by Neha P
